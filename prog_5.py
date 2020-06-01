@@ -14,28 +14,21 @@ def fanc(filename):
     for x in seq:
         if (n == 0):
             a = int(x)
-            n+=1
-        if (n ==1):
+        elif (n ==1 ):
             b = int(x)
-            n+=1
-        #if (n == 2):
-            #c = int(x)
-           # n+=1    
-        elif (x == a):
+            if (a ==b):
+               k+=1
+        elif (int(x) == a):
             k += 1
-            n+=1
-        elif(x==b): 
+        elif (int(x)==b):
             m+=1
-            n+=1
-        else: 
-            n+=1
-            
-        
+        n+=1
     f.close()
-    if(k>(n-2)):
+    print(k, m, n)
+    if (k>(n-3)):
       res=1
-      
-    elif(m>(n-2)):
+      print('yes,you can')
+    elif(m>(n-3)):
       res=1
       print('yes,you can')
     else:
