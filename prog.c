@@ -1,182 +1,154 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <float.h>
-void AutoTest(void);
-int func(FILE* restrict);
+
+typedef struct {
+    char name[128];
+    unsigned int group;
+    double rating;
+} Student;
 
 
 
-int func(FILE* input_file) {
-    FILE* output_file;
-    char s[2];
-    char t[0];
-    int** a;
-    int* temp;
-    int m = 0, n = 0, flag = 0, l = 0, f = 0, fl = 0, k = 0, i = 0, num = 0, v = 0, fR = 0, y = 0;
-    double max = DBL_MIN;
-
-    rewind(input_file);
-    fscanf(input_file, "%c", &t[0]);
-    if (t[0] == ' ') {
-        y = 1;
+Student** mass(FILE* input, int size) {
+    char str[128];
+    char sep[2] = " ";
+    char* istr;
+    Student** arrStud;
+    arrStud = (Student**)malloc(size * sizeof(Student*));
+    if (arrStud == NULL) {
+        printf("Error! Can't allocate memory!\n");
     }
-    rewind(input_file);
-    while (flag == 0) {
-        if (fscanf(input_file, "%c", &s[0]) == 1) {
-            if (isdigit(s[0]) == 1) {
-                f = 1;
-            }
-            if (((s[0] == ' ') || (s[0] == '\n')) && (f == 1)) {
-                k++;
-                num++;
-                f = 0;
-            }
-            if (s[0] == '\n') {
-                m++;
-                if (k >= n) {
-                    n = k;
+    for (int i = 0; i < size; i++) {
+        fgets(str, sizeof(str), input);
+        arrStud[i] = (Student*)malloc(sizeof(Student));
+        istr = strtok(str, sep);
+        strcpy(arrStud[i]->name, istr);
+        istr = strtok(NULL, sep);
+        arrStud[i]->group = atoi(istr);
+        istr = strtok(NULL, sep);
+        arrStud[i]->rating = atof(istr);
+    }
+    return arrStud;
+}
+
+
+
+int func(FILE* input) {
+    FILE* output;
+    Student** arrstud;
+    Student** temp;
+    char str[514];
+    int size = 1;
+    int m = 0;
+    int s = 0;
+    while (fgets(str, 514, input)) {
+        size++;
+    }
+    s = size;
+    rewind(input);
+    arrstud = mass(input, size);
+    if (arrstud == NULL) {
+        return -1;
+    }
+    else {
+        for (int i = 0; i < size - 1; i++) {
+            for (int j = i + 1; j < size; j++) {
+                if ((strcmp(arrstud[i]->name, arrstud[j]->name) == 0) && (arrstud[i]->group == arrstud[j]->group)) {
+                    if (arrstud[i]->rating < arrstud[j]->rating) {
+                        arrstud[i]->rating = arrstud[j]->rating;
+                    }
+                    m++;
+                    free(arrstud[j]);
+                    for (int s = j; s < size - 1; s++) {
+                        arrstud[s] = arrstud[s + 1];
+                    }
+                    j--;
+                    size--;
                 }
-                k = 0;
             }
         }
-        else {
-            flag = 1;
-            num++;
-            k++;
-            if (k >= n) {
-                n = k;
-            }
-        }
-    }
-    m++;
-    a = (int**)malloc(m * sizeof(int*));
-    for (int ii = 0; ii < m; ii++) {
-        a[ii] = (int*)malloc((n + 1) * sizeof(int));
-    }
-    flag = 0;
-    k = 0;
-    rewind(input_file);
-    while (flag == 0) {
-        if (fscanf(input_file, "%c", &s[0]) == 1) {
-            if (isdigit(s[0]) == 1) {
-                f = 1;
-            }
-            if (((s[0] == ' ') || (s[0] == '\n')) && (f == 1)) {
-                k++;
-                f = 0;
-            }
-            if (s[0] == '\n') {
-                a[i][0] = k;
-                i++;
-                k = 0;
-            }
-        }
-        else {
-            flag = 1;
-            k++;
-            a[i][0] = k;
-        }
-    }
-    if (y == 1) {
-        a[0][0] = (a[0][0] - 1);
-    }
-    rewind(input_file);
-    for (i = 0; i < m; i++) {
-        for (int j = 1; j <= a[i][0]; j++) {
-            fscanf(input_file, "%d", &a[i][j]);
-        }
-    }
-    flag = 0;
-    f = 0;
-    for (i = 0; i < m; i++) {
-        if (i == 0) {
-            for (int j = 1; j <= a[i][0]; j++) {
-           
-    if (fl == 0) {
-        for (int i = 0; i < m; i++) {
-            for (int j = fR; j < a[i][0]; j++) {
-                a[i][j] = a[i][j + 1];
-            }
-            temp = (int*)realloc(a[i], (n) * sizeof(int));
+        if (m != 0) {
+            temp = (Student**)realloc(arrstud, (s - m) * sizeof(Student*));
             if (temp) {
-                a[i] = temp;
+                arrstud = temp;
             }
         }
-        for (int i = 0; i < m; i++) {
-            a[i][0] = a[i][0] - 1;
+        output = fopen("res.txt", "w");
+        for (int i = 0; i < s - m; i++) {
+            fprintf(output, "%s ", arrstud[i]->name);
+            fprintf(output, "%d ", arrstud[i]->group);
+            fprintf(output, "%lf\n", arrstud[i]->rating);
         }
-    }
-    output_file = fopen("data.txt", "w");
-    for (i = 0; i < m; i++) {
-        for (int j = 1; j <= a[i][0]; j++) {
-            printf("%d ", a[i][j]);
-            fprintf(output_file, "%d ", a[i][j]);
+        for (int i = 0; i < s - m; i++) {
+            free(arrstud[i]);
         }
-        printf("\n");
-        fprintf(output_file, "\n");
+        free(arrstud);
+        fclose(output);
+        return 0;
     }
-    fclose(output_file);
-    for (int ii = 0; ii < m; ii++) {
-        free(a[ii]);
-    }
-    free(a);
-    return 1;
 }
 
 
 void AutoTest(void) {
-    int num = 0;
-    int m = 0;
-    FILE* output_file;
-    FILE* input_file;
-    input_file = fopen("test.txt", "r");
-    if (!input_file) {
+    FILE* input;
+    FILE* output;
+    char t[514];
+    char str[64];
+    char st[] = "Sam 123 5.000000";
+    input = fopen("test.txt", "r++");
+    if (!input) {
         printf("Error! Cannot open file !\n");
     }
     else {
-        if (fscanf(input_file, "%d\n", &num) != 1) {
-            printf("Error! Cannot read data \n");
-            fclose(input_file);
+        if (fgets(t, 514, input) == NULL) {
+            printf("Error! Cannot read from file!\n");
+            fclose(input);
         }
         else {
-            func(input_file);
-            fclose(input_file);
-            output_file = fopen("data.txt", "r");
-            fscanf(output_file, "%d", &m);
-            fclose(output_file);
-            if (m == 1) {
+            func(input);
+            fclose(input);
+            output = fopen("res.txt", "r");
+            fgets(str, sizeof(str), output);
+            if (strcmp(st, str) == 0) {
                 printf("Autotest passed\n");
             }
             else {
                 printf("Autotest failed\n");
             }
+            fclose(output);
         }
     }
 }
 
 
+
+
 int main(void) {
-    int num = 0;
-    FILE* input_file;
-    input_file = fopen("file.txt", "r");
+    FILE* input;
+    char t[514];
+    int f;
+    input = fopen("text.txt", "r");
     AutoTest();
-    if (!input_file) {
+    if (!input) {
         printf("Error! Cannot open file !\n");
         return -1;
     }
     else {
-        if (fscanf(input_file, "%d\n", &num) != 1) {
-            printf("Error! Cannot read data \n");
-            fclose(input_file);
+        if (fgets(t, 514, input) == NULL) {   //
+            printf("Error! Cannot read from file!\n");
+            fclose(input);
             return -1;
         }
         else {
-            func(input_file);
-            fclose(input_file);
+            f = func(input);
+            if (f == 0) {
+                return 0;
+            }
+            else {
+                return -1;
+            }
+            fclose(input);
         }
     }
-    return 0;
 }
